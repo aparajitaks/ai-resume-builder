@@ -1,4 +1,4 @@
-import { Navigate, Outlet } from "react-router-dom";
+import { Outlet, Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import Navbar from "../components/Navbar";
 
@@ -14,16 +14,17 @@ const DashboardLayout = () => {
     );
   }
 
+  // If NOT logged in → redirect to login
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-50">
       {/* Top Navbar */}
       <Navbar />
 
-      {/* Main Content */}
+      {/* Main dashboard content */}
       <main className="max-w-7xl mx-auto px-4 py-6">
         <Outlet />
       </main>
