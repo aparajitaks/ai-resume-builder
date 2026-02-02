@@ -1,62 +1,61 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { loginUser } from "../services/auth.service";
+import { useAuth } from "../hooks/useAuth";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const handleLogin = async (e) => {
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
     try {
-      const res = await axios.post(
-        "http://localhost:5001/api/auth/login",
-        { email, password }
-      );
-
-      localStorage.setItem("token", res.data.token);
+      const data = await loginUser(form);
+      login(data.token);
       navigate("/dashboard");
     } catch (err) {
-      alert("Invalid credentials");
+      setError(err.response?.data?.message || "Login failed");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <form
-        onSubmit={handleLogin}
-        className="bg-white p-8 rounded-lg shadow-md w-96"
-      >
-        <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
+    <>
+      <h2 className="text-2xl font-bold mb-4">Login</h2>
 
+      {error && <p className="text-red-500 mb-2">{error}</p>}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
         <input
-          type="email"
+          name="email"
           placeholder="Email"
-          className="w-full p-2 mb-4 border rounded"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          className="w-full border p-2 rounded"
+          onChange={handleChange}
           required
         />
 
         <input
+          name="password"
           type="password"
           placeholder="Password"
-          className="w-full p-2 mb-4 border rounded"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          className="w-full border p-2 rounded"
+          onChange={handleChange}
           required
         />
 
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
-        >
+        <button className="w-full bg-black text-white py-2 rounded">
           Login
         </button>
       </form>
-    </div>
+    </>
   );
 };
 
