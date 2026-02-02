@@ -5,7 +5,6 @@ import Navbar from "../components/Navbar";
 const DashboardLayout = () => {
   const { user, loading } = useAuth();
 
-  // While auth state is loading
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -14,18 +13,15 @@ const DashboardLayout = () => {
     );
   }
 
-  // If NOT logged in → redirect to login
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Top Navbar */}
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
 
-      {/* Main dashboard content */}
-      <main className="max-w-7xl mx-auto px-4 py-6">
+      <main className="flex-1 max-w-7xl mx-auto px-4 py-6 w-full">
         <Outlet />
       </main>
     </div>
