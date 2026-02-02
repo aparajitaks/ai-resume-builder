@@ -1,15 +1,37 @@
-const Navbar = () => {
-  return (
-    <header className="h-16 w-full flex items-center justify-between px-6 border-b bg-white">
-      <h1 className="text-xl font-bold">AI Resume Builder</h1>
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 
-      <div className="flex items-center gap-4">
-        <span className="text-sm text-gray-600">Welcome 👋</span>
-        <button className="text-sm text-red-500 hover:underline">
+const Navbar = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
+  return (
+    <nav className="bg-white shadow px-6 py-4 flex justify-between items-center">
+      <h1 className="text-xl font-bold text-indigo-600">
+        AI Resume Builder
+      </h1>
+
+      <div className="flex gap-4 items-center">
+        <Link to="/dashboard" className="text-gray-700 hover:text-indigo-600">
+          Dashboard
+        </Link>
+        <Link to="/builder" className="text-gray-700 hover:text-indigo-600">
+          Builder
+        </Link>
+
+        <button
+          onClick={handleLogout}
+          className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+        >
           Logout
         </button>
       </div>
-    </header>
+    </nav>
   );
 };
 
