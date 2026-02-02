@@ -12,12 +12,10 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  // Not logged in → redirect to login
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
-  // Logged in → allow access
   return children;
 };
 
