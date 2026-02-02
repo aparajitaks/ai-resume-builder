@@ -1,29 +1,13 @@
-import api from "./api";
+import axios from "axios";
 
-const login = async (data) => {
-  const res = await api.post("/auth/login", data);
-  localStorage.setItem("user", JSON.stringify(res.data));
+const API_URL = "http://localhost:5001/api/auth";
+
+export const loginUser = async (data) => {
+  const res = await axios.post(`${API_URL}/login`, data);
   return res.data;
 };
 
-const register = async (data) => {
-  const res = await api.post("/auth/register", data);
-  localStorage.setItem("user", JSON.stringify(res.data));
+export const registerUser = async (data) => {
+  const res = await axios.post(`${API_URL}/register`, data);
   return res.data;
-};
-
-const logout = () => {
-  localStorage.removeItem("user");
-};
-
-const getCurrentUser = () => {
-  const user = localStorage.getItem("user");
-  return user ? JSON.parse(user) : null;
-};
-
-export default {
-  login,
-  register,
-  logout,
-  getCurrentUser,
 };
