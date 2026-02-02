@@ -1,26 +1,16 @@
-import { Outlet, Navigate } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
+import { Navigate, Outlet } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const AuthLayout = () => {
   const { user, loading } = useAuth();
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-lg font-semibold">Loading...</p>
-      </div>
-    );
-  }
+  if (loading) return null;
 
   if (user) {
     return <Navigate to="/dashboard" replace />;
   }
 
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <Outlet />
-    </div>
-  );
+  return <Outlet />;
 };
 
 export default AuthLayout;

@@ -1,26 +1,24 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { registerUser } from "../services/auth.service";
+import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
 
 const Register = () => {
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
-  const [error, setError] = useState("");
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
     try {
-      await registerUser(form);
+      await axios.post("http://localhost:5000/api/auth/register", {
+        email,
+        password,
+      });
+
       navigate("/login");
     } catch (err) {
       setError(err.response?.data?.message || "Registration failed");
@@ -28,42 +26,48 @@ const Register = () => {
   };
 
   return (
-    <>
-      <h2 className="text-2xl font-bold mb-4">Register</h2>
+    <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-lg">
+      <h2 className="text-2xl font-bold mb-6 text-center">
+        Create your account
+      </h2>
 
-      {error && <p className="text-red-500 mb-2">{error}</p>}
+      {error && (
+        <p className="bg-red-100 text-red-600 p-2 mb-4 rounded">
+          {error}
+        </p>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
-          name="name"
-          placeholder="Name"
-          className="w-full border p-2 rounded"
-          onChange={handleChange}
-          required
-        />
-
-        <input
-          name="email"
+          type="email"
           placeholder="Email"
-          className="w-full border p-2 rounded"
-          onChange={handleChange}
+          className="w-full border p-3 rounded"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           required
         />
 
         <input
-          name="password"
           type="password"
           placeholder="Password"
-          className="w-full border p-2 rounded"
-          onChange={handleChange}
+          className="w-full border p-3 rounded"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           required
         />
 
-        <button className="w-full bg-black text-white py-2 rounded">
+        <button className="w-full bg-indigo-600 text-white py-3 rounded hover:bg-indigo-700">
           Register
         </button>
       </form>
-    </>
+
+      <p className="text-center text-sm mt-4">
+        Already have an account?{" "}
+        <Link to="/login" className="text-indigo-600">
+          Login
+        </Link>
+      </p>
+    </div>
   );
 };
 

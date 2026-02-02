@@ -8,11 +8,9 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-
     if (token) {
       setUser({ token });
     }
-
     setLoading(false);
   }, []);
 
@@ -33,6 +31,10 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-export const useAuthContext = () => {
-  return useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used inside AuthProvider");
+  }
+  return context;
 };
