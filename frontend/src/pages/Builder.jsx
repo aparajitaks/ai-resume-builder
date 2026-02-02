@@ -1,11 +1,10 @@
-import ResumeForm from "../dashboard/ResumeForm";
-import ResumePreview from "../dashboard/ResumePreview";
-
 const Builder = () => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <ResumeForm />
-      <ResumePreview />
+    <div>
+      <h1 className="text-2xl font-bold">Resume Builder</h1>
+      <p className="mt-2 text-gray-600">
+        Build your resume here.
+      </p>
     </div>
   );
 };
