@@ -1,24 +1,23 @@
-import { generateSummary, improveExperience } from "../ai/ai.service.js";
+import {
+  improveExperience,
+  generateSummary,
+} from "../services/ai.service.js";
 
-const generateSummaryController = async (req, res) => {
+export const improveExperienceController = async (req, res) => {
+  try {
+    const improvedText = await improveExperience(req.body);
+    res.json({ improvedText });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// -------- Generate Summary Controller --------
+export const generateSummaryController = async (req, res) => {
   try {
     const summary = await generateSummary(req.body);
     res.json({ summary });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-};
-
-const improveExperienceController = async (req, res) => {
-  try {
-    const improved = await improveExperience(req.body);
-    res.json({ improved });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-export default {
-  generateSummaryController,
-  improveExperienceController,
 };
