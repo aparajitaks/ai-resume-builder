@@ -1,20 +1,26 @@
-import jwt from "jsonwebtoken";
+import { verifyToken } from "../utils/jwt.js";
+import AppError from "../utils/AppError.js";
 
+/**
+ * Authentication middleware — verifies the Bearer access token
+ * and attaches the decoded user to `req.user`.
+ */
 const authMiddleware = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "No token provided" });
+    return next(new AppError("Authentication required", 401));
   }
 
   try {
     const token = authHeader.split(" ")[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = verifyToken(token, process.env.JWT_SECRET);
 
-    req.user = decoded;
+    req.user = decoded; // { userId, iat, exp }
     next();
   } catch (error) {
-    return res.status(401).json({ message: "Invalid token" });
+    // Let the global error handler distinguish expired vs invalid
+    next(error);
   }
 };
 

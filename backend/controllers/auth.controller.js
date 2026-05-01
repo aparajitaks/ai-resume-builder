@@ -1,52 +1,94 @@
 import User from "../models/User.model.js";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyToken,
+} from "../utils/jwt.js";
+import AppError from "../utils/AppError.js";
 
-export const registerUser = async (req, res) => {
+// ── Register ──
+export const registerUser = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+      throw new AppError("User already exists", 409);
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await User.create({
+    await User.create({
       name,
       email,
       password: hashedPassword,
     });
 
-    res.status(201).json({ message: "User registered successfully" });
+    res.status(201).json({
+      success: true,
+      message: "User registered successfully",
+    });
   } catch (error) {
-    res.status(500).json({ message: "Registration failed" });
+    next(error);
   }
 };
 
-export const loginUser = async (req, res) => {
+// ── Login ──
+export const loginUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      throw new AppError("Invalid credentials", 401);
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      throw new AppError("Invalid credentials", 401);
     }
 
-    const token = jwt.sign(
-      { id: user._id, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    const accessToken = generateAccessToken(user._id);
+    const refreshToken = generateRefreshToken(user._id);
 
-    res.json({ token });
+    res.json({
+      success: true,
+      data: {
+        accessToken,
+        refreshToken,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+        },
+      },
+    });
   } catch (error) {
-    res.status(500).json({ message: "Login failed" });
+    next(error);
+  }
+};
+
+// ── Refresh Token ──
+export const refreshTokenController = async (req, res, next) => {
+  try {
+    const { refreshToken } = req.body;
+
+    const decoded = verifyToken(refreshToken, process.env.JWT_REFRESH_SECRET);
+
+    // Verify the user still exists
+    const user = await User.findById(decoded.userId);
+    if (!user) {
+      throw new AppError("User no longer exists", 401);
+    }
+
+    const newAccessToken = generateAccessToken(user._id);
+
+    res.json({
+      success: true,
+      data: { accessToken: newAccessToken },
+    });
+  } catch (error) {
+    next(error);
   }
 };
