@@ -1,11 +1,11 @@
-import OpenAI from "openai";
+import Groq from "groq-sdk";
 import AppError from "../utils/AppError.js";
 
-const getOpenAIClient = () => {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new AppError("OPENAI_API_KEY is missing", 500);
+const getGroqClient = () => {
+  if (!process.env.GROQ_API_KEY) {
+    throw new AppError("GROQ_API_KEY is missing", 500);
   }
-  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  return new Groq({ apiKey: process.env.GROQ_API_KEY });
 };
 
 export const generateCoverLetter = async ({
@@ -16,7 +16,7 @@ export const generateCoverLetter = async ({
   company,
   jobDescription,
 }) => {
-  const openai = getOpenAIClient();
+  const groq = getGroqClient();
 
   const prompt = `
 You are a professional cover letter writer.
@@ -41,8 +41,8 @@ Rules:
 - Do NOT include date, address headers, or signature block
 `;
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+  const response = await groq.chat.completions.create({
+    model: "llama-3.1-8b-instant",
     messages: [{ role: "user", content: prompt }],
   });
 

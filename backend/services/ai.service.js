@@ -1,15 +1,12 @@
-import OpenAI from "openai";
+import Groq from "groq-sdk";
 import AppError from "../utils/AppError.js";
 
-// Helper to create client AFTER env is loaded
-const getOpenAIClient = () => {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new AppError("OPENAI_API_KEY is missing", 500);
+// Helper to create Groq client AFTER env is loaded
+const getGroqClient = () => {
+  if (!process.env.GROQ_API_KEY) {
+    throw new AppError("GROQ_API_KEY is missing", 500);
   }
-
-  return new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
+  return new Groq({ apiKey: process.env.GROQ_API_KEY });
 };
 
 // -------- Improve Experience --------
@@ -18,7 +15,7 @@ export const improveExperience = async ({ role, company, description }) => {
     throw new AppError("Description is required", 400);
   }
 
-  const openai = getOpenAIClient();
+  const groq = getGroqClient();
 
   const prompt = `
 You are a professional resume writer.
@@ -31,8 +28,8 @@ Company: ${company || "N/A"}
 Description: ${description}
 `;
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+  const response = await groq.chat.completions.create({
+    model: "llama-3.1-8b-instant",
     messages: [{ role: "user", content: prompt }],
   });
 
@@ -46,7 +43,7 @@ export const generateSummary = async ({
   skills,
   experience,
 }) => {
-  const openai = getOpenAIClient();
+  const groq = getGroqClient();
 
   const prompt = `
 Write a short professional resume summary.
@@ -59,8 +56,8 @@ Experience: ${experience?.map(e => e.role).join(", ")}
 Keep it concise and ATS-friendly. Max 3-4 lines. No emojis. No first-person words.
 `;
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+  const response = await groq.chat.completions.create({
+    model: "llama-3.1-8b-instant",
     messages: [{ role: "user", content: prompt }],
   });
 
@@ -69,7 +66,7 @@ Keep it concise and ATS-friendly. Max 3-4 lines. No emojis. No first-person word
 
 // -------- ATS Score --------
 export const scoreATS = async ({ personal, experience, skills, education, summary }) => {
-  const openai = getOpenAIClient();
+  const groq = getGroqClient();
 
   const prompt = `
 You are an ATS (Applicant Tracking System) expert.
@@ -90,8 +87,8 @@ RESPOND ONLY with valid JSON in this exact format (no markdown, no code fences):
 {"score": <number>, "feedback": "<feedback string with items separated by newlines>"}
 `;
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+  const response = await groq.chat.completions.create({
+    model: "llama-3.1-8b-instant",
     messages: [{ role: "user", content: prompt }],
   });
 
@@ -108,7 +105,7 @@ RESPOND ONLY with valid JSON in this exact format (no markdown, no code fences):
 
 // -------- Suggest Skills --------
 export const suggestSkills = async ({ title, experience, currentSkills }) => {
-  const openai = getOpenAIClient();
+  const groq = getGroqClient();
 
   const prompt = `
 You are a career advisor and ATS expert.
@@ -123,8 +120,8 @@ RESPOND ONLY with valid JSON in this exact format (no markdown, no code fences):
 {"skills": ["skill1", "skill2", "skill3"]}
 `;
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+  const response = await groq.chat.completions.create({
+    model: "llama-3.1-8b-instant",
     messages: [{ role: "user", content: prompt }],
   });
 
@@ -138,7 +135,7 @@ RESPOND ONLY with valid JSON in this exact format (no markdown, no code fences):
 
 // -------- Tailor Resume to Job Description --------
 export const tailorToJob = async ({ summary, experience, skills, jobDescription }) => {
-  const openai = getOpenAIClient();
+  const groq = getGroqClient();
 
   const prompt = `
 You are a professional resume writer and ATS optimization expert.
@@ -163,8 +160,8 @@ RESPOND ONLY with valid JSON in this exact format (no markdown, no code fences):
 }
 `;
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+  const response = await groq.chat.completions.create({
+    model: "llama-3.1-8b-instant",
     messages: [{ role: "user", content: prompt }],
   });
 
