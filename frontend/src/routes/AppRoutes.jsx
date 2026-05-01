@@ -8,6 +8,7 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
 import Builder from "../pages/Builder";
+import MyResumes from "../pages/MyResumes";
 
 const AppRoutes = () => {
   return (
@@ -28,6 +29,8 @@ const AppRoutes = () => {
       >
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/builder" element={<Builder />} />
+        <Route path="/builder/:id" element={<Builder />} />
+        <Route path="/my-resumes" element={<MyResumes />} />
       </Route>
 
       {/* ================= REDIRECTS ================= */}

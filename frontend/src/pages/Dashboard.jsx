@@ -17,7 +17,7 @@ const Dashboard = () => {
 
       <div className="grid md:grid-cols-3 gap-6">
         {/* Create Resume */}
-        <div className="bg-white rounded-xl shadow p-6">
+        <div className="bg-white rounded-xl shadow p-6 hover:shadow-md transition-shadow">
           <h2 className="text-xl font-semibold mb-2">Create Resume</h2>
           <p className="text-gray-600 mb-4">
             Start building a new resume with AI assistance.
@@ -31,25 +31,31 @@ const Dashboard = () => {
         </div>
 
         {/* My Resumes */}
-        <div className="bg-white rounded-xl shadow p-6 opacity-60">
+        <div className="bg-white rounded-xl shadow p-6 hover:shadow-md transition-shadow">
           <h2 className="text-xl font-semibold mb-2">My Resumes</h2>
           <p className="text-gray-600 mb-4">
-            View and edit your saved resumes.
+            View, edit, and manage your saved resumes.
           </p>
-          <span className="text-sm bg-gray-200 px-3 py-1 rounded">
-            Coming soon
-          </span>
+          <Link
+            to="/my-resumes"
+            className="text-indigo-600 font-medium hover:underline"
+          >
+            View All →
+          </Link>
         </div>
 
-        {/* AI Suggestions */}
-        <div className="bg-white rounded-xl shadow p-6 opacity-60">
-          <h2 className="text-xl font-semibold mb-2">AI Suggestions</h2>
+        {/* AI Features */}
+        <div className="bg-white rounded-xl shadow p-6 hover:shadow-md transition-shadow">
+          <h2 className="text-xl font-semibold mb-2">AI Features</h2>
           <p className="text-gray-600 mb-4">
-            Improve bullet points using AI.
+            ATS scoring, skill suggestions, and smart summaries.
           </p>
-          <span className="text-sm bg-gray-200 px-3 py-1 rounded">
-            Coming soon
-          </span>
+          <Link
+            to="/builder"
+            className="text-indigo-600 font-medium hover:underline"
+          >
+            Try Now →
+          </Link>
         </div>
       </div>
     </div>
