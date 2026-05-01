@@ -49,6 +49,9 @@ const resumeSchema = new mongoose.Schema(
       feedback: { type: String, default: "" },
       checkedAt: { type: Date, default: null },
     },
+    // ── Sharing ──
+    shareId: { type: String, default: null, unique: true, sparse: true },
+    isPublic: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

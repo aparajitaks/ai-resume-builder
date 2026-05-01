@@ -135,3 +135,47 @@ RESPOND ONLY with valid JSON in this exact format (no markdown, no code fences):
     throw new AppError("Failed to parse skills suggestion response", 500);
   }
 };
+
+// -------- Tailor Resume to Job Description --------
+export const tailorToJob = async ({ summary, experience, skills, jobDescription }) => {
+  const openai = getOpenAIClient();
+
+  const prompt = `
+You are a professional resume writer and ATS optimization expert.
+
+A user has an existing resume and wants to tailor it for a specific job. Rewrite:
+1. The professional summary — make it highly relevant to the job
+2. Each experience bullet point — emphasize skills/achievements that match the job
+3. Suggest 3-5 additional skills from the job description that should be added
+
+Current Summary: ${summary || "None"}
+Current Experience: ${experience?.length ? experience.map(e => `Role: ${e.role}, Company: ${e.company}, Description: ${e.description}`).join(" || ") : "None"}
+Current Skills: ${skills?.length ? skills.join(", ") : "None"}
+
+Job Description:
+${jobDescription}
+
+RESPOND ONLY with valid JSON in this exact format (no markdown, no code fences):
+{
+  "summary": "<tailored summary>",
+  "experience": [{"role": "<same role>", "company": "<same company>", "description": "<tailored description>"}],
+  "suggestedSkills": ["skill1", "skill2"]
+}
+`;
+
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [{ role: "user", content: prompt }],
+  });
+
+  try {
+    const parsed = JSON.parse(response.choices[0].message.content);
+    return {
+      summary: parsed.summary || summary,
+      experience: parsed.experience || experience,
+      suggestedSkills: parsed.suggestedSkills || [],
+    };
+  } catch {
+    throw new AppError("Failed to parse tailor response", 500);
+  }
+};
