@@ -1,12 +1,13 @@
 import prisma from "../config/prisma.js";
 import AppError from "../utils/AppError.js";
 import { nanoid } from "nanoid";
+import { successResponse } from "../utils/response.js";
 
 // ── Toggle Share ──
 export const toggleShare = async (req, res, next) => {
   try {
     const resume = await prisma.resume.findFirst({
-      where: { id: req.params.id, userId: req.user.userId },
+      where: { id: req.params.id, userId: req.user.userId, deletedAt: null },
     });
     if (!resume) throw new AppError("Resume not found", 404);
 
@@ -18,7 +19,7 @@ export const toggleShare = async (req, res, next) => {
       data: { isPublic, shareId },
     });
 
-    res.json({ success: true, data: { isPublic, shareId } });
+    successResponse(res, { isPublic, shareId }, "Share status updated");
   } catch (error) {
     next(error);
   }
@@ -28,7 +29,7 @@ export const toggleShare = async (req, res, next) => {
 export const getPublicResume = async (req, res, next) => {
   try {
     const resume = await prisma.resume.findFirst({
-      where: { shareId: req.params.shareId, isPublic: true },
+      where: { shareId: req.params.shareId, isPublic: true, deletedAt: null },
       select: {
         id: true, title: true, personal: true, summary: true,
         experience: true, education: true, skills: true,
@@ -37,7 +38,7 @@ export const getPublicResume = async (req, res, next) => {
     });
     if (!resume) throw new AppError("Resume not found or not public", 404);
 
-    res.json({ success: true, data: resume });
+    successResponse(res, resume, "Public resume retrieved");
   } catch (error) {
     next(error);
   }
