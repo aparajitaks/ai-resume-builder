@@ -30,15 +30,26 @@ export const getPublicResume = async (req, res, next) => {
   try {
     const resume = await prisma.resume.findFirst({
       where: { shareId: req.params.shareId, isPublic: true, deletedAt: null },
-      select: {
-        id: true, title: true, personal: true, summary: true,
-        experience: true, education: true, skills: true,
-        atsScore: true, createdAt: true, updatedAt: true,
+      include: {
+        user: {
+          select: {
+            name: true,
+            referralCode: true,
+          },
+        },
       },
     });
+
     if (!resume) throw new AppError("Resume not found or not public", 404);
 
-    successResponse(res, resume, "Public resume retrieved");
+    // Dynamic Meta context for the frontend to inject into <head>
+    const meta = {
+      title: `${resume.user.name}'s Professional Portfolio | Powered by AI`,
+      description: `Check out this AI-optimized resume. Create your own and get 15 free credits using code: ${resume.user.referralCode}`,
+      referralUrl: `${process.env.CORS_ORIGIN || 'http://localhost:5173'}/register?ref=${resume.user.referralCode}`
+    };
+
+    successResponse(res, { resume, meta }, "Public resume retrieved");
   } catch (error) {
     next(error);
   }
