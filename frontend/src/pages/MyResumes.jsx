@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { getResumes, deleteResume } from "../services/resume.service";
+import { getResumes, deleteResume, duplicateResume } from "../services/resume.service";
 import { useToast } from "../context/ToastContext";
 import Loader from "../components/ui/Loader";
 
@@ -11,6 +11,7 @@ const MyResumes = () => {
   const [resumes, setResumes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState(null);
+  const [duplicatingId, setDuplicatingId] = useState(null);
 
   useEffect(() => {
     fetchResumes();
@@ -42,6 +43,21 @@ const MyResumes = () => {
       showToast("Failed to delete resume", "error");
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleDuplicate = async (id) => {
+    try {
+      setDuplicatingId(id);
+      const res = await duplicateResume(id);
+      if (res.success) {
+        setResumes([res.data, ...resumes]);
+        showToast("Resume duplicated!", "success");
+      }
+    } catch (error) {
+      showToast("Failed to duplicate resume", "error");
+    } finally {
+      setDuplicatingId(null);
     }
   };
 
@@ -125,9 +141,16 @@ const MyResumes = () => {
                   ✏️ Edit
                 </button>
                 <button
+                  onClick={() => handleDuplicate(resume._id)}
+                  disabled={duplicatingId === resume._id}
+                  className="text-sm text-blue-500 hover:text-blue-700 font-medium disabled:text-gray-400"
+                >
+                  {duplicatingId === resume._id ? "Cloning..." : "📋 Duplicate"}
+                </button>
+                <button
                   onClick={() => handleDelete(resume._id)}
                   disabled={deletingId === resume._id}
-                  className="text-sm text-red-500 hover:text-red-700 font-medium disabled:text-gray-400"
+                  className="text-sm text-red-500 hover:text-red-700 font-medium disabled:text-gray-400 ml-auto"
                 >
                   {deletingId === resume._id ? "Deleting..." : "🗑️ Delete"}
                 </button>
