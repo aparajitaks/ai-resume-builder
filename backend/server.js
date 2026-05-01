@@ -7,13 +7,15 @@ import { validateEnv } from "./validators/env.validator.js";
 validateEnv();
 
 import app from "./app.js";
-import connectDB from "./config/db.js";
+import prisma from "./config/prisma.js";
 
 const PORT = process.env.PORT || 5001;
 
 const startServer = async () => {
   try {
-    await connectDB();
+    // Verify database connection
+    await prisma.$connect();
+    console.log("✅ Database connected (Prisma)");
 
     app.listen(PORT, () => {
       console.log(`✅ Server running on port ${PORT}`);
@@ -23,5 +25,16 @@ const startServer = async () => {
     process.exit(1);
   }
 };
+
+// Graceful shutdown
+process.on("SIGTERM", async () => {
+  await prisma.$disconnect();
+  process.exit(0);
+});
+
+process.on("SIGINT", async () => {
+  await prisma.$disconnect();
+  process.exit(0);
+});
 
 startServer();

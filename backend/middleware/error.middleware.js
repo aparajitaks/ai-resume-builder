@@ -1,4 +1,5 @@
 import { ZodError } from "zod";
+import { Prisma } from "@prisma/client";
 import AppError from "../utils/AppError.js";
 
 /**
@@ -33,21 +34,26 @@ const errorHandler = (err, req, res, _next) => {
     error = "TokenExpired";
   }
 
-  // ── Mongoose Validation Error ──
-  if (err.name === "ValidationError" && err.errors) {
-    statusCode = 400;
-    message = "Validation failed";
-    error = Object.values(err.errors)
-      .map((e) => e.message)
-      .join("; ");
-  }
-
-  // ── Mongoose Duplicate Key ──
-  if (err.code === 11000) {
+  // ── Prisma: Unique constraint violation (P2002) ──
+  if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
     statusCode = 409;
-    const field = Object.keys(err.keyPattern)[0];
+    const field = err.meta?.target?.[0] || "field";
     message = `${field} already exists`;
     error = "DuplicateKey";
+  }
+
+  // ── Prisma: Record not found (P2025) ──
+  if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") {
+    statusCode = 404;
+    message = "Record not found";
+    error = "NotFound";
+  }
+
+  // ── Prisma: Validation error ──
+  if (err instanceof Prisma.PrismaClientValidationError) {
+    statusCode = 400;
+    message = "Invalid data provided";
+    error = "ValidationError";
   }
 
   // ── Custom AppError (operational) ──

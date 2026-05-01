@@ -1,4 +1,4 @@
-import User from "../models/User.model.js";
+import prisma from "../config/prisma.js";
 import bcrypt from "bcryptjs";
 import {
   generateAccessToken,
@@ -12,17 +12,15 @@ export const registerUser = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
       throw new AppError("User already exists", 409);
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await User.create({
-      name,
-      email,
-      password: hashedPassword,
+    await prisma.user.create({
+      data: { name, email, password: hashedPassword },
     });
 
     res.status(201).json({
@@ -39,7 +37,7 @@ export const loginUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
       throw new AppError("Invalid credentials", 401);
     }
@@ -49,8 +47,8 @@ export const loginUser = async (req, res, next) => {
       throw new AppError("Invalid credentials", 401);
     }
 
-    const accessToken = generateAccessToken(user._id);
-    const refreshToken = generateRefreshToken(user._id);
+    const accessToken = generateAccessToken(user.id);
+    const refreshToken = generateRefreshToken(user.id);
 
     res.json({
       success: true,
@@ -58,7 +56,7 @@ export const loginUser = async (req, res, next) => {
         accessToken,
         refreshToken,
         user: {
-          id: user._id,
+          id: user.id,
           name: user.name,
           email: user.email,
         },
@@ -77,12 +75,14 @@ export const refreshTokenController = async (req, res, next) => {
     const decoded = verifyToken(refreshToken, process.env.JWT_REFRESH_SECRET);
 
     // Verify the user still exists
-    const user = await User.findById(decoded.userId);
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+    });
     if (!user) {
       throw new AppError("User no longer exists", 401);
     }
 
-    const newAccessToken = generateAccessToken(user._id);
+    const newAccessToken = generateAccessToken(user.id);
 
     res.json({
       success: true,
