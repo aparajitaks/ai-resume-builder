@@ -67,3 +67,19 @@ export const suggestSkillsSchema = z.object({
     .default([]),
   currentSkills: z.array(z.string()).optional().default([]),
 });
+
+export const tailorToJobSchema = z.object({
+  summary: z.string().optional().default(""),
+  experience: z
+    .array(
+      z.object({
+        role: z.string().optional().default(""),
+        company: z.string().optional().default(""),
+        description: z.string().optional().default(""),
+      })
+    )
+    .optional()
+    .default([]),
+  skills: z.array(z.string()).optional().default([]),
+  jobDescription: z.string().trim().min(10, "Job description is required (min 10 chars)"),
+});

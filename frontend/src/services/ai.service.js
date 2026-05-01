@@ -49,3 +49,18 @@ export const suggestSkills = async ({ title, experience, currentSkills }) => {
   });
   return res.data;
 };
+
+export const tailorToJob = async ({
+  summary,
+  experience,
+  skills,
+  jobDescription,
+}) => {
+  const res = await api.post("/api/ai/tailor-to-job", {
+    summary,
+    experience,
+    skills,
+    jobDescription,
+  });
+  return res.data;
+};

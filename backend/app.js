@@ -4,6 +4,8 @@ import cors from "cors";
 import authRoutes from "./routes/auth.routes.js";
 import resumeRoutes from "./routes/resume.routes.js";
 import aiRoutes from "./routes/ai.routes.js";
+import coverLetterRoutes from "./routes/coverLetter.routes.js";
+import shareRoutes from "./routes/share.routes.js";
 import errorHandler from "./middleware/error.middleware.js";
 import AppError from "./utils/AppError.js";
 
@@ -29,6 +31,8 @@ app.get("/api/health", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/resumes", resumeRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/cover-letter", coverLetterRoutes);
+app.use("/api", shareRoutes);
 
 // ── 404 catch-all ──
 app.all("*", (req, res, next) => {

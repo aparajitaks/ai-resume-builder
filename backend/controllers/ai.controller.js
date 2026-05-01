@@ -3,6 +3,7 @@ import {
   generateSummary,
   scoreATS,
   suggestSkills,
+  tailorToJob,
 } from "../services/ai.service.js";
 
 // ── Improve Experience ──
@@ -55,6 +56,20 @@ export const suggestSkillsController = async (req, res, next) => {
     res.json({
       success: true,
       data: { skills },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ── Tailor to Job ──
+export const tailorToJobController = async (req, res, next) => {
+  try {
+    const result = await tailorToJob(req.body);
+
+    res.json({
+      success: true,
+      data: result,
     });
   } catch (error) {
     next(error);

@@ -24,3 +24,23 @@ export const deleteResume = async (id) => {
   const res = await api.delete(`/api/resumes/${id}`);
   return res.data;
 };
+
+export const duplicateResume = async (id) => {
+  const res = await api.post(`/api/resumes/${id}/duplicate`);
+  return res.data;
+};
+
+export const getResumeStats = async () => {
+  const res = await api.get("/api/resumes/stats");
+  return res.data;
+};
+
+export const toggleShare = async (id) => {
+  const res = await api.post(`/api/resumes/${id}/share`);
+  return res.data;
+};
+
+export const getPublicResume = async (shareId) => {
+  const res = await api.get(`/api/share/${shareId}`);
+  return res.data;
+};

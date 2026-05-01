@@ -6,12 +6,14 @@ import {
   generateSummarySchema,
   scoreATSSchema,
   suggestSkillsSchema,
+  tailorToJobSchema,
 } from "../validators/ai.validator.js";
 import {
   improveExperienceController,
   generateSummaryController,
   scoreATSController,
   suggestSkillsController,
+  tailorToJobController,
 } from "../controllers/ai.controller.js";
 
 const router = express.Router();
@@ -43,6 +45,13 @@ router.post(
   authMiddleware,
   validate(suggestSkillsSchema),
   suggestSkillsController
+);
+
+router.post(
+  "/tailor-to-job",
+  authMiddleware,
+  validate(tailorToJobSchema),
+  tailorToJobController
 );
 
 export default router;
