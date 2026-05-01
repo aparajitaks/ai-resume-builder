@@ -1,10 +1,11 @@
 import jwt from "jsonwebtoken";
+import config from "../config/index.js";
 
 /**
  * Generate a short-lived access token (15 minutes).
  */
-export const generateAccessToken = (userId) => {
-  return jwt.sign({ userId }, process.env.JWT_SECRET, {
+export const generateAccessToken = (userId, role = "USER") => {
+  return jwt.sign({ userId, role }, config.jwtSecret, {
     expiresIn: "15m",
   });
 };
@@ -13,14 +14,13 @@ export const generateAccessToken = (userId) => {
  * Generate a long-lived refresh token (7 days).
  */
 export const generateRefreshToken = (userId) => {
-  return jwt.sign({ userId }, process.env.JWT_REFRESH_SECRET, {
+  return jwt.sign({ userId }, config.jwtRefreshSecret, {
     expiresIn: "7d",
   });
 };
 
 /**
  * Verify a token against a given secret.
- * Returns the decoded payload or throws.
  */
 export const verifyToken = (token, secret) => {
   return jwt.verify(token, secret);
