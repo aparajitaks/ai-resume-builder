@@ -46,11 +46,31 @@ export const deleteResume = async (id, userId) => {
 
 export const duplicateResume = async (id, userId) => {
   const original = await getResumeById(id, userId);
+  // eslint-disable-next-line no-unused-vars
   const { id: _, createdAt: __, updatedAt: ___, shareId: ____, ...data } = original;
   
   return resumeRepository.create({
     ...data,
+    userId,
     title: `${data.title} (Copy)`,
     atsScore: { score: null, feedback: "", checkedAt: null },
   });
+};
+
+export const getResumeStats = async (userId) => {
+  const resumes = await resumeRepository.getStats(userId);
+
+  const totalResumes = resumes.length;
+  const scored = resumes.filter((r) => r.atsScore?.score != null);
+  const avgAtsScore =
+    scored.length > 0
+      ? Math.round(scored.reduce((s, r) => s + r.atsScore.score, 0) / scored.length)
+      : null;
+  const bestAtsScore =
+    scored.length > 0
+      ? Math.max(...scored.map((r) => r.atsScore.score))
+      : null;
+  const recentResumes = resumes.slice(0, 5);
+
+  return { totalResumes, avgAtsScore, bestAtsScore, recentResumes };
 };

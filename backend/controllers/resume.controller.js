@@ -54,3 +54,12 @@ export const duplicateResume = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getResumeStats = async (req, res, next) => {
+  try {
+    const stats = await resumeService.getResumeStats(req.user.userId);
+    successResponse(res, stats, "Stats retrieved successfully");
+  } catch (error) {
+    next(error);
+  }
+};
