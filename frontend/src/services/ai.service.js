@@ -23,3 +23,29 @@ export const generateSummary = async ({
   });
   return res.data;
 };
+
+export const scoreATS = async ({
+  personal,
+  summary,
+  experience,
+  education,
+  skills,
+}) => {
+  const res = await api.post("/api/ai/score-ats", {
+    personal,
+    summary,
+    experience,
+    education,
+    skills,
+  });
+  return res.data;
+};
+
+export const suggestSkills = async ({ title, experience, currentSkills }) => {
+  const res = await api.post("/api/ai/suggest-skills", {
+    title,
+    experience,
+    currentSkills,
+  });
+  return res.data;
+};
