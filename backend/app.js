@@ -12,6 +12,7 @@ import resumeRoutes from "./routes/resume.routes.js";
 import aiRoutes from "./routes/ai.routes.js";
 import coverLetterRoutes from "./routes/coverLetter.routes.js";
 import shareRoutes from "./routes/share.routes.js";
+import paymentRoutes from "./routes/payment.routes.js";
 import errorHandler from "./middleware/error.middleware.js";
 import AppError from "./utils/AppError.js";
 
@@ -21,10 +22,10 @@ const app = express();
 app.use(helmet());
 app.use(cookieParser());
 
-// ── Rate Limiting (DDoS protection) ──
+// ── Rate Limiting ──
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per window
+  windowMs: 15 * 60 * 1000,
+  max: 100,
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -40,6 +41,9 @@ app.use(
     credentials: true,
   })
 );
+
+// ── Webhook Route (MUST be before express.json() for Stripe raw body) ──
+app.use("/api/payments", paymentRoutes);
 
 // ── Body parsing ──
 app.use(express.json({ limit: "1mb" }));
