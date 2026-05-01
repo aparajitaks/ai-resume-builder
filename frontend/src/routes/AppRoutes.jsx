@@ -9,6 +9,8 @@ import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
 import Builder from "../pages/Builder";
 import MyResumes from "../pages/MyResumes";
+import CoverLetter from "../pages/CoverLetter";
+import SharedResume from "../pages/SharedResume";
 
 const AppRoutes = () => {
   return (
@@ -18,6 +20,9 @@ const AppRoutes = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
       </Route>
+
+      {/* ================= PUBLIC ROUTES ================= */}
+      <Route path="/share/:shareId" element={<SharedResume />} />
 
       {/* ================= PROTECTED DASHBOARD ROUTES ================= */}
       <Route
@@ -31,6 +36,7 @@ const AppRoutes = () => {
         <Route path="/builder" element={<Builder />} />
         <Route path="/builder/:id" element={<Builder />} />
         <Route path="/my-resumes" element={<MyResumes />} />
+        <Route path="/cover-letter" element={<CoverLetter />} />
       </Route>
 
       {/* ================= REDIRECTS ================= */}
