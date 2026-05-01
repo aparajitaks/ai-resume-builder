@@ -48,6 +48,16 @@ app.use("/api/payments", paymentRoutes);
 // ── Body parsing ──
 app.use(express.json({ limit: "1mb" }));
 
+// ── Root Welcome Route ──
+app.get("/", (req, res) => {
+  res.json({
+    success: true,
+    message: "🚀 AI Resume Builder API is Running",
+    version: "1.0.0",
+    docs: "/api/health",
+  });
+});
+
 // ── Health check ──
 app.get("/api/health", (req, res) => {
   res.json({ success: true, message: "Backend is running in " + config.nodeEnv + " mode" });
