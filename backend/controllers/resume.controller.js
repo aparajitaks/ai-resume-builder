@@ -1,25 +1,32 @@
 import Resume from "../models/Resume.model.js";
 
-// CREATE resume
-export const createResume = async (req, res) => {
+// ── Create Resume ──
+export const createResume = async (req, res, next) => {
   try {
     const resume = await Resume.create({
-      userId: req.user.id,
+      userId: req.user.userId,
       ...req.body,
     });
 
-    res.status(201).json(resume);
+    res.status(201).json({
+      success: true,
+      data: resume,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Failed to create resume" });
+    next(error);
   }
 };
 
-// GET all resumes for logged-in user
-export const getResumes = async (req, res) => {
+// ── Get All Resumes ──
+export const getResumes = async (req, res, next) => {
   try {
-    const resumes = await Resume.find({ userId: req.user.id });
-    res.status(200).json(resumes);
+    const resumes = await Resume.find({ userId: req.user.userId });
+
+    res.json({
+      success: true,
+      data: resumes,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch resumes" });
+    next(error);
   }
 };
