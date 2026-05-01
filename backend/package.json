@@ -12,7 +12,6 @@
     "dotenv": "^17.2.3",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.10.0",
     "nanoid": "^5.1.11",
     "openai": "^6.17.0",
     "zod": "^4.4.1"
