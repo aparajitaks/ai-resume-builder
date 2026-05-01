@@ -3,21 +3,30 @@ import {
   generateSummary,
 } from "../services/ai.service.js";
 
-export const improveExperienceController = async (req, res) => {
+// ── Improve Experience ──
+export const improveExperienceController = async (req, res, next) => {
   try {
     const improvedText = await improveExperience(req.body);
-    res.json({ improvedText });
+
+    res.json({
+      success: true,
+      data: { improvedText },
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-// -------- Generate Summary Controller --------
-export const generateSummaryController = async (req, res) => {
+// ── Generate Summary ──
+export const generateSummaryController = async (req, res, next) => {
   try {
     const summary = await generateSummary(req.body);
-    res.json({ summary });
+
+    res.json({
+      success: true,
+      data: { summary },
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
