@@ -13,6 +13,7 @@ import aiRoutes from "./routes/ai.routes.js";
 import coverLetterRoutes from "./routes/coverLetter.routes.js";
 import shareRoutes from "./routes/share.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
+import viralRoutes from "./routes/viral.routes.js";
 import errorHandler from "./middleware/error.middleware.js";
 import AppError from "./utils/AppError.js";
 
@@ -68,6 +69,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/resumes", resumeRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/cover-letter", coverLetterRoutes);
+app.use("/api/viral", viralRoutes);
 app.use("/api", shareRoutes);
 
 // ── 404 catch-all ──
