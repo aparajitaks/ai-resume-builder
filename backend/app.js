@@ -1,6 +1,12 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
+import morgan from "morgan";
+import cookieParser from "cookie-parser";
+import rateLimit from "express-rate-limit";
 
+import config from "./config/index.js";
+import logger from "./utils/logger.js";
 import authRoutes from "./routes/auth.routes.js";
 import resumeRoutes from "./routes/resume.routes.js";
 import aiRoutes from "./routes/ai.routes.js";
@@ -11,20 +17,36 @@ import AppError from "./utils/AppError.js";
 
 const app = express();
 
+// ── Security Hardening ──
+app.use(helmet());
+app.use(cookieParser());
+
+// ── Rate Limiting (DDoS protection) ──
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per window
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use("/api", limiter);
+
+// ── Logging ──
+app.use(morgan("combined", { stream: { write: (message) => logger.info(message.trim()) } }));
+
 // ── CORS ──
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+    origin: config.corsOrigin,
     credentials: true,
   })
 );
 
-// ── Body parsing with size limit ──
+// ── Body parsing ──
 app.use(express.json({ limit: "1mb" }));
 
 // ── Health check ──
 app.get("/api/health", (req, res) => {
-  res.json({ success: true, message: "Backend is running" });
+  res.json({ success: true, message: "Backend is running in " + config.nodeEnv + " mode" });
 });
 
 // ── Routes ──
@@ -39,7 +61,7 @@ app.all("*", (req, res, next) => {
   next(new AppError(`Route ${req.method} ${req.originalUrl} not found`, 404));
 });
 
-// ── Global error handler (must be last) ──
+// ── Global error handler ──
 app.use(errorHandler);
 
 export default app;
