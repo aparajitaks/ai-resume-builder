@@ -1,7 +1,12 @@
 import { useState } from "react";
+import { improveExperience } from "../services/ai.service";
+import { useToast } from "../context/ToastContext";
+import Loader from "../components/ui/Loader";
 
-const [aiLoadingIndex, setAiLoadingIndex] = useState(null);
 const Builder = () => {
+  const { showToast } = useToast();
+  const [aiLoadingIndex, setAiLoadingIndex] = useState(null);
+
   const [resume, setResume] = useState({
     personal: {
       fullName: "",
@@ -11,18 +16,46 @@ const Builder = () => {
       location: "",
     },
     skills: [],
-    experience: [
-      { role: "", company: "", description: "" },
-    ],
+    experience: [{ role: "", company: "", description: "" }],
     education: [],
   });
+
+  const handleImproveExperience = async (index) => {
+    const exp = resume.experience[index];
+
+    if (!exp.description.trim()) {
+      showToast("Please write a description first", "error");
+      return;
+    }
+
+    try {
+      setAiLoadingIndex(index);
+
+      const res = await improveExperience({
+        role: exp.role,
+        company: exp.company,
+        description: exp.description,
+      });
+
+      if (res.success) {
+        const updated = [...resume.experience];
+        updated[index].description = res.data.improvedText;
+        setResume({ ...resume, experience: updated });
+        showToast("Experience improved with AI!", "success");
+      }
+    } catch (error) {
+      const message =
+        error.response?.data?.message || "AI improvement failed";
+      showToast(message, "error");
+    } finally {
+      setAiLoadingIndex(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="max-w-7xl mx-auto px-6 py-10">
-        <h1 className="text-3xl font-bold mb-8 text-red-500">
-          Resume Builder
-        </h1>
+        <h1 className="text-3xl font-bold mb-8">Resume Builder</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* ================= FORM (LEFT) ================= */}
@@ -36,6 +69,7 @@ const Builder = () => {
               Full Name
             </label>
             <input
+              id="builder-fullname"
               type="text"
               value={resume.personal.fullName}
               onChange={(e) =>
@@ -55,6 +89,7 @@ const Builder = () => {
               Professional Title
             </label>
             <input
+              id="builder-title"
               type="text"
               value={resume.personal.title}
               onChange={(e) =>
@@ -71,9 +106,7 @@ const Builder = () => {
 
             {/* ================= SKILLS ================= */}
             <div className="mt-10">
-              <h2 className="text-xl font-semibold mb-4">
-                Skills
-              </h2>
+              <h2 className="text-xl font-semibold mb-4">Skills</h2>
 
               <div className="flex gap-2 mb-4">
                 <input
@@ -81,21 +114,33 @@ const Builder = () => {
                   id="skillInput"
                   placeholder="Add a skill"
                   className="flex-1 border rounded-lg px-4 py-2"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      const value = e.target.value.trim();
+                      if (!value) return;
+                      setResume({
+                        ...resume,
+                        skills: [...resume.skills, value],
+                      });
+                      e.target.value = "";
+                    }
+                  }}
                 />
                 <button
+                  id="add-skill-btn"
                   onClick={() => {
-                    const input =
-                      document.getElementById("skillInput");
-                    if (!input.value) return;
+                    const input = document.getElementById("skillInput");
+                    if (!input.value.trim()) return;
 
                     setResume({
                       ...resume,
-                      skills: [...resume.skills, input.value],
+                      skills: [...resume.skills, input.value.trim()],
                     });
 
                     input.value = "";
                   }}
-                  className="bg-indigo-600 text-white px-4 py-2 rounded-lg"
+                  className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
                 >
                   Add
                 </button>
@@ -117,7 +162,7 @@ const Builder = () => {
                           ),
                         })
                       }
-                      className="text-red-500 font-bold"
+                      className="text-red-500 font-bold hover:text-red-700"
                     >
                       ×
                     </button>
@@ -128,9 +173,7 @@ const Builder = () => {
 
             {/* ================= EXPERIENCE ================= */}
             <div className="mt-10">
-              <h2 className="text-xl font-semibold mb-4">
-                Experience
-              </h2>
+              <h2 className="text-xl font-semibold mb-4">Experience</h2>
 
               {resume.experience.map((exp, index) => (
                 <div
@@ -172,8 +215,7 @@ const Builder = () => {
                     value={exp.description}
                     onChange={(e) => {
                       const updated = [...resume.experience];
-                      updated[index].description =
-                        e.target.value;
+                      updated[index].description = e.target.value;
                       setResume({
                         ...resume,
                         experience: updated,
@@ -183,57 +225,43 @@ const Builder = () => {
                     className="w-full border rounded-lg px-3 py-2"
                   />
 
-                  {resume.experience.length > 1 && (
+                  <div className="flex items-center gap-2 mt-3">
                     <button
-  disabled={aiLoadingIndex === index}
-  onClick={async () => {
-    try {
-      setAiLoadingIndex(index);
+                      disabled={aiLoadingIndex === index}
+                      onClick={() => handleImproveExperience(index)}
+                      className={`text-sm px-3 py-1.5 rounded-lg text-white flex items-center gap-2 transition-colors ${
+                        aiLoadingIndex === index
+                          ? "bg-gray-400 cursor-not-allowed"
+                          : "bg-indigo-600 hover:bg-indigo-700"
+                      }`}
+                    >
+                      {aiLoadingIndex === index && <Loader size="sm" />}
+                      {aiLoadingIndex === index
+                        ? "Improving..."
+                        : "✨ Improve with AI"}
+                    </button>
 
-      const response = await fetch(
-        "http://localhost:5001/api/ai/improve-experience",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            role: exp.role,
-            company: exp.company,
-            description: exp.description,
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "AI failed");
-      }
-
-      const updated = [...resume.experience];
-      updated[index].description = data.improvedText;
-      setResume({ ...resume, experience: updated });
-    } catch (error) {
-      alert(error.message);
-    } finally {
-      setAiLoadingIndex(null);
-    }
-  }}
-  className={`text-sm px-3 py-1 rounded-lg text-white ${
-    aiLoadingIndex === index
-      ? "bg-gray-400 cursor-not-allowed"
-      : "bg-indigo-600 hover:bg-indigo-700"
-  }`}
->
-  {aiLoadingIndex === index ? "Improving..." : "✨ Improve with AI"}
-</button>
-
-                  )}
+                    {resume.experience.length > 1 && (
+                      <button
+                        onClick={() =>
+                          setResume({
+                            ...resume,
+                            experience: resume.experience.filter(
+                              (_, i) => i !== index
+                            ),
+                          })
+                        }
+                        className="text-sm text-red-500 hover:text-red-700 ml-auto"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
 
               <button
+                id="add-experience-btn"
                 onClick={() =>
                   setResume({
                     ...resume,
@@ -247,7 +275,7 @@ const Builder = () => {
                     ],
                   })
                 }
-                className="bg-gray-100 border px-4 py-2 rounded-lg"
+                className="bg-gray-100 border px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"
               >
                 + Add Experience
               </button>
@@ -275,15 +303,12 @@ const Builder = () => {
                 {/* Skills Preview */}
                 {resume.skills.length > 0 && (
                   <div className="mb-6">
-                    <h3 className="font-semibold mb-2">
-                      Skills
-                    </h3>
+                    <h3 className="font-semibold mb-2">Skills</h3>
                     <div className="flex flex-wrap gap-2">
                       {resume.skills.map((skill, i) => (
                         <span
                           key={i}
-                          className="border px-3 py-1 \
-rounded-full text-sm"
+                          className="border px-3 py-1 rounded-full text-sm"
                         >
                           {skill}
                         </span>
@@ -297,9 +322,7 @@ rounded-full text-sm"
                   (e) => e.role || e.company || e.description
                 ) && (
                   <div>
-                    <h3 className="font-semibold mb-3">
-                      Experience
-                    </h3>
+                    <h3 className="font-semibold mb-3">Experience</h3>
                     {resume.experience.map((exp, i) => (
                       <div key={i} className="mb-4">
                         <p className="font-medium">
@@ -310,7 +333,7 @@ rounded-full text-sm"
                             </span>
                           )}
                         </p>
-                        <p className="text-sm text-gray-700">
+                        <p className="text-sm text-gray-700 whitespace-pre-line">
                           {exp.description}
                         </p>
                       </div>

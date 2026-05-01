@@ -1,10 +1,15 @@
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Dashboard = () => {
+  const { user } = useAuth();
+
   return (
     <div className="space-y-10">
       <div>
-        <h1 className="text-3xl font-bold">Welcome 👋</h1>
+        <h1 className="text-3xl font-bold">
+          Welcome{user?.name ? `, ${user.name}` : ""} 👋
+        </h1>
         <p className="text-gray-600 mt-1">
           Build, edit and download AI-powered resumes.
         </p>

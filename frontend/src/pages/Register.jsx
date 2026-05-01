@@ -1,27 +1,53 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
+import { registerUser } from "../services/auth.service";
+import { useToast } from "../context/ToastContext";
+import Loader from "../components/ui/Loader";
 
 const Register = () => {
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = "Invalid email format";
+    }
+
+    if (!password) {
+      newErrors.password = "Password is required";
+    } else if (password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+    if (!validateForm()) return;
 
+    setLoading(true);
     try {
-      await axios.post("http://localhost:5000/api/auth/register", {
-        email,
-        password,
-      });
-
+      await registerUser({ name, email, password });
+      showToast("Account created! Please log in.", "success");
       navigate("/login");
     } catch (err) {
-      setError(err.response?.data?.message || "Registration failed");
+      const message =
+        err.response?.data?.message || "Registration failed. Please try again.";
+      showToast(message, "error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -31,39 +57,73 @@ const Register = () => {
         Create your account
       </h2>
 
-      {error && (
-        <p className="bg-red-100 text-red-600 p-2 mb-4 rounded">
-          {error}
-        </p>
-      )}
-
       <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full border p-3 rounded"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+        <div>
+          <input
+            id="register-name"
+            type="text"
+            placeholder="Full Name (optional)"
+            className="w-full border p-3 rounded"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </div>
 
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full border p-3 rounded"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+        <div>
+          <input
+            id="register-email"
+            type="email"
+            placeholder="Email"
+            className={`w-full border p-3 rounded ${
+              errors.email ? "border-red-500" : ""
+            }`}
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (errors.email) setErrors((prev) => ({ ...prev, email: "" }));
+            }}
+            required
+          />
+          {errors.email && (
+            <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+          )}
+        </div>
 
-        <button className="w-full bg-indigo-600 text-white py-3 rounded hover:bg-indigo-700">
-          Register
+        <div>
+          <input
+            id="register-password"
+            type="password"
+            placeholder="Password (min 6 characters)"
+            className={`w-full border p-3 rounded ${
+              errors.password ? "border-red-500" : ""
+            }`}
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (errors.password)
+                setErrors((prev) => ({ ...prev, password: "" }));
+            }}
+            required
+          />
+          {errors.password && (
+            <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+          )}
+        </div>
+
+        <button
+          id="register-submit"
+          type="submit"
+          disabled={loading}
+          className="w-full bg-indigo-600 text-white py-3 rounded hover:bg-indigo-700 disabled:bg-indigo-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        >
+          {loading && <Loader size="sm" />}
+          {loading ? "Creating account..." : "Register"}
         </button>
       </form>
 
       <p className="text-center text-sm mt-4">
         Already have an account?{" "}
-        <Link to="/login" className="text-indigo-600">
+        <Link to="/login" className="text-indigo-600 hover:underline">
           Login
         </Link>
       </p>
