@@ -119,7 +119,7 @@ const Builder = () => {
       setSaveLoading(true);
       const payload = { ...resume, ...(atsResult && { atsScore: { score: atsResult.score, feedback: atsResult.feedback, checkedAt: new Date().toISOString() } }) };
       if (savedId) { await updateResume(savedId, payload); showToast("Resume updated!", "success"); }
-      else { const res = await createResume(payload); if (res.success) { setSavedId(res.data._id); showToast("Resume saved!", "success"); } }
+      else { const res = await createResume(payload); if (res.success) { setSavedId(res.data.id); showToast("Resume saved!", "success"); } }
     } catch (e) { showToast(e.response?.data?.message || "Save failed", "error"); }
     finally { setSaveLoading(false); }
   };

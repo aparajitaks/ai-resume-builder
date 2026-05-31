@@ -1,4 +1,5 @@
 import * as authService from "../services/auth.service.js";
+import * as userRepository from "../repositories/user.repository.js";
 import { successResponse } from "../utils/response.js";
 
 const cookieOptions = {
@@ -44,7 +45,11 @@ export const refreshTokenController = async (req, res, next) => {
 };
 
 export const logoutUser = async (req, res, next) => {
-  // Logic to clear refresh token in DB can be added here
-  res.clearCookie("refreshToken");
-  successResponse(res, null, "Logged out successfully");
+  try {
+    await userRepository.updateRefreshToken(req.user.userId, null);
+    res.clearCookie("refreshToken");
+    successResponse(res, null, "Logged out successfully");
+  } catch (error) {
+    next(error);
+  }
 };

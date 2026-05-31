@@ -9,6 +9,17 @@ const getGroqClient = () => {
   return new Groq({ apiKey: process.env.GROQ_API_KEY });
 };
 
+// -------- Generic Groq Helper --------
+export const getGroqResponse = async (prompt) => {
+  const groq = getGroqClient();
+  const response = await groq.chat.completions.create({
+    model: "llama-3.1-8b-instant",
+    messages: [{ role: "user", content: prompt }],
+  });
+  return response.choices[0].message.content;
+};
+
+
 // -------- Improve Experience --------
 export const improveExperience = async ({ role, company, description }) => {
   if (!description) {

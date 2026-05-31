@@ -1,4 +1,5 @@
 import prisma from "../config/prisma.js";
+import { nanoid } from "nanoid";
 
 export const findUserByEmail = async (email) => {
   return prisma.user.findFirst({
@@ -14,7 +15,10 @@ export const findUserById = async (id) => {
 
 export const createUser = async (userData) => {
   return prisma.user.create({
-    data: userData,
+    data: {
+      ...userData,
+      referralCode: nanoid(8),
+    },
   });
 };
 
